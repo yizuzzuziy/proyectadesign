@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Proyecta Design | Architecture & Engineering</title>
     
-    <!-- Fonts: Space Grotesk (Raw/Technical) & Inter (Functional) -->
+    <!-- ORIGINAL FONTS RESTORED: Space Grotesk & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
@@ -28,16 +28,18 @@
             --accent-red: #FF3333; /* Residential */
             --grid-line: #222;
             
+            /* ORIGINAL FONTS */
             --font-head: 'Space Grotesk', sans-serif;
             --font-body: 'Inter', sans-serif;
         }
 
         * {
             box-sizing: border-box;
-            cursor: none; /* Custom cursor logic */
+            cursor: none; /* Custom cursor logic for Desktop */
+            -webkit-tap-highlight-color: transparent; /* Remove blue tap box on mobile */
         }
 
-        /* Scrollbar styling for modal */
+        /* Scrollbar styling */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -67,7 +69,7 @@
             letter-spacing: -0.02em;
         }
 
-        /* --- CUSTOM CURSOR (FIXED Z-INDEX) --- */
+        /* --- CUSTOM CURSOR --- */
         .cursor {
             position: fixed;
             top: 0;
@@ -76,11 +78,17 @@
             height: 12px;
             background: white;
             border-radius: 50%;
-            pointer-events: none;
+            pointer-events: none; /* Crucial for elementFromPoint to work */
             z-index: 20001;
             transform: translate(-50%, -50%);
             mix-blend-mode: difference;
-            transition: width 0.3s, height 0.3s, background-color 0.2s;
+            transition: width 0.3s, height 0.3s, background-color 0.2s, opacity 0.2s;
+            opacity: 0; /* Hidden by default until move/touch */
+        }
+
+        /* Show cursor on desktop hover automatically */
+        @media (hover: hover) and (pointer: fine) {
+            .cursor { opacity: 1; }
         }
 
         .cursor-label {
@@ -100,7 +108,7 @@
             font-weight: 700;
         }
 
-        /* --- PRELOADER (GEOMETRIC STYLE) --- */
+        /* --- PRELOADER --- */
         .preloader {
             position: fixed;
             top: 0;
@@ -297,20 +305,16 @@
         </div>
     </div>
 
-    <!-- HEADER (LOGO ONLY, NO MENU) -->
-    <header class="fixed top-0 left-0 p-6 z-50">
-        <!-- 
-            IMPORTANTE: Guarda la imagen de tu logo como "logo.png" 
-            en la misma carpeta que este archivo. 
-        -->
-        <img src="./logo.png" alt="Proyecta Design" class="h-36 md:h-40 object-contain">
+    <!-- HEADER (LOGO ONLY) -->
+    <header class="fixed top-0 left-0 p-6 z-50 pointer-events-none">
+        <!-- Logo file must be named logo.png and be in the same folder -->
+        <img src="./logo.png" alt="Proyecta Design" class="h-16 md:h-20 object-contain pointer-events-auto">
     </header>
 
     <main>
         <!-- HERO -->
         <section class="hero" id="home">
             <div class="hero-bg-container">
-                <!-- High Quality Architecture Images -->
                 <img src="https://images.unsplash.com/photo-1486718448742-163732cd1544?q=80&w=2560&auto=format&fit=crop" class="hero-slide active" alt="Slide 1">
                 <img src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?q=80&w=2560&auto=format&fit=crop" class="hero-slide" alt="Slide 2">
                 <img src="https://images.unsplash.com/photo-1470058869958-2a77ade41c02?q=80&w=2560&auto=format&fit=crop" class="hero-slide" alt="Slide 3">
@@ -559,7 +563,7 @@
             slides[currentSlide].classList.add('active');
         }, 5000);
 
-        // 4. CURSOR LOGIC (FIXED)
+        // 4. CURSOR LOGIC (DESKTOP & MOBILE)
         const cursor = document.querySelector('.cursor');
         const cursorLabel = document.querySelector('.cursor-label');
 
@@ -569,18 +573,19 @@
         const xToLabel = gsap.quickTo(cursorLabel, "x", { duration: 0.15, ease: "power3" });
         const yToLabel = gsap.quickTo(cursorLabel, "y", { duration: 0.15, ease: "power3" });
 
-        // Global mouse trackers
+        // -- DESKTOP EVENTS --
         let mouseX = 0;
         let mouseY = 0;
 
         document.addEventListener('mousemove', (e) => {
+            // Show cursor if hidden
+            if(cursor.style.opacity === '0') gsap.to(cursor, { opacity: 1 });
+            
             mouseX = e.clientX;
             mouseY = e.clientY;
             
             xTo(mouseX);
             yTo(mouseY);
-            
-            // Default offset for label
             xToLabel(mouseX + 20);
             yToLabel(mouseY + 20);
         });
@@ -588,24 +593,13 @@
         const projects = document.querySelectorAll('.project-item');
 
         projects.forEach(project => {
-            // Hover: Show Title + Fix Jump Issue
+            // Hover Desktop
             project.addEventListener('mouseenter', () => {
-                const title = project.getAttribute('data-title');
-                const cat = project.getAttribute('data-cat');
-                const color = project.getAttribute('data-color');
-                
-                cursorLabel.innerHTML = title;
-                
-                // FORCE POSITION IMMEDIATELY to prevent jumping to 0,0
-                gsap.set(cursorLabel, { x: mouseX + 20, y: mouseY + 20 });
-                
-                gsap.to(cursor, { scale: 3, backgroundColor: color, mixBlendMode: 'normal' });
-                gsap.to(cursorLabel, { opacity: 1 });
+                activateCursor(project);
             });
             
             project.addEventListener('mouseleave', () => {
-                gsap.to(cursor, { scale: 1, backgroundColor: 'white', mixBlendMode: 'difference' });
-                gsap.to(cursorLabel, { opacity: 0 });
+                deactivateCursor();
             });
 
             // Click: Open Modal
@@ -613,6 +607,77 @@
                 openModal(project);
             });
         });
+
+        // -- HELPER FUNCTIONS FOR CURSOR STATES --
+        function activateCursor(projectElement) {
+            const title = projectElement.getAttribute('data-title');
+            const color = projectElement.getAttribute('data-color');
+            
+            cursorLabel.innerHTML = title;
+            gsap.set(cursorLabel, { x: mouseX + 20, y: mouseY + 20 }); // Force pos
+            
+            gsap.to(cursor, { scale: 3, backgroundColor: color, mixBlendMode: 'normal' });
+            gsap.to(cursorLabel, { opacity: 1 });
+        }
+
+        function deactivateCursor() {
+            gsap.to(cursor, { scale: 1, backgroundColor: 'white', mixBlendMode: 'difference' });
+            gsap.to(cursorLabel, { opacity: 0 });
+        }
+
+
+        // -- MOBILE TOUCH EVENTS (SLIDE FINGER) --
+        
+        // 1. Touch Start: Make visible immediately
+        document.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            mouseX = touch.clientX;
+            mouseY = touch.clientY;
+
+            // Force position immediately so it doesn't fly in from top-left
+            xTo(mouseX);
+            yTo(mouseY);
+            xToLabel(mouseX + 20);
+            yToLabel(mouseY + 20);
+
+            // Fade in cursor
+            gsap.to(cursor, { opacity: 1, duration: 0.2 });
+        }, { passive: true });
+
+        // 2. Touch Move: Follow finger & Check for elements underneath
+        document.addEventListener('touchmove', (e) => {
+            const touch = e.touches[0];
+            mouseX = touch.clientX;
+            mouseY = touch.clientY;
+
+            // Update position
+            xTo(mouseX);
+            yTo(mouseY);
+            xToLabel(mouseX + 20);
+            yToLabel(mouseY + 20);
+
+            // MAGIC: Check what element is under the finger
+            const elementBelow = document.elementFromPoint(mouseX, mouseY);
+            if (elementBelow) {
+                // Find if we are touching a project item (or its children)
+                const projectItem = elementBelow.closest('.project-item');
+                
+                if (projectItem) {
+                    // Activate utilities (Color, Text)
+                    activateCursor(projectItem);
+                } else {
+                    // Reset to default white dot
+                    deactivateCursor();
+                }
+            }
+        }, { passive: true });
+
+        // 3. Touch End: Hide cursor
+        document.addEventListener('touchend', () => {
+            gsap.to(cursor, { opacity: 0, duration: 0.2 });
+            deactivateCursor();
+        });
+
 
         // 5. MODAL LOGIC & IMAGES
         const modal = document.getElementById('projectModal');
@@ -676,8 +741,8 @@
             }
         });
 
-        // 6. PARALLAX
-        gsap.to(".hero-title", {
+        // 6. PARALLAX FIX (APPLIED TO CONTAINER)
+        gsap.to(".hero-content", {
             yPercent: 50, ease: "none",
             scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true }
         });
