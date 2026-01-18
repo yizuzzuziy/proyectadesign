@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Proyecta Design | Architecture & Engineering</title>
     
-    <!-- ORIGINAL FONTS RESTORED: Space Grotesk & Inter -->
+    <!-- FONTS: Space Grotesk & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
@@ -22,37 +22,26 @@
         :root {
             --bg: #050505;
             --text: #e0e0e0;
-            --accent-cyan: #00FFFF; /* Security/Tech */
-            --accent-yellow: #FFFF00; /* Commercial/Interior */
-            --accent-green: #00FF00; /* Landscape/Hospitality */
-            --accent-red: #FF3333; /* Residential */
+            --accent-cyan: #00FFFF;
+            --accent-yellow: #FFFF00;
+            --accent-green: #00FF00;
+            --accent-red: #FF3333;
             --grid-line: #222;
             
-            /* ORIGINAL FONTS */
             --font-head: 'Space Grotesk', sans-serif;
             --font-body: 'Inter', sans-serif;
         }
 
         * {
             box-sizing: border-box;
-            cursor: none; /* Custom cursor logic for Desktop */
-            -webkit-tap-highlight-color: transparent; /* Remove blue tap box on mobile */
+            cursor: none; /* Custom cursor on Desktop */
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Scrollbar styling */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0a0a0a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
 
         body {
             background-color: var(--bg);
@@ -78,15 +67,14 @@
             height: 12px;
             background: white;
             border-radius: 50%;
-            pointer-events: none; /* Crucial for elementFromPoint to work */
+            pointer-events: none;
             z-index: 20001;
             transform: translate(-50%, -50%);
             mix-blend-mode: difference;
             transition: width 0.3s, height 0.3s, background-color 0.2s, opacity 0.2s;
-            opacity: 0; /* Hidden by default until move/touch */
+            opacity: 0;
         }
 
-        /* Show cursor on desktop hover automatically */
         @media (hover: hover) and (pointer: fine) {
             .cursor { opacity: 1; }
         }
@@ -177,19 +165,37 @@
             z-index: 10;
         }
 
+        /* --- TYPOGRAPHY ADJUSTMENTS FOR MOBILE --- */
         .hero-title {
-            font-size: 9vw;
-            line-height: 0.85;
+            /* Mobile first size: Larger relative to screen width */
+            font-size: 15vw; 
+            line-height: 0.9;
             font-weight: 500;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             color: white;
         }
+        
         .hero-subtitle {
-            font-size: 1.5rem;
+            /* Mobile first size: Smaller, readable */
+            font-size: 0.9rem;
             max-width: 600px;
             color: #ddd;
-            border-left: 2px solid white;
-            padding-left: 20px;
+            border-left: 1px solid white; /* Thinner line on mobile */
+            padding-left: 15px;
+            line-height: 1.4;
+        }
+
+        /* Desktop Adjustments */
+        @media(min-width: 768px) {
+            .hero-title {
+                font-size: 9vw; /* Original Desktop Size */
+                margin-bottom: 2rem;
+            }
+            .hero-subtitle {
+                font-size: 1.5rem; /* Original Desktop Size */
+                border-left: 2px solid white;
+                padding-left: 20px;
+            }
         }
 
         /* --- PROJECTS GRID --- */
@@ -305,9 +311,8 @@
         </div>
     </div>
 
-    <!-- HEADER (LOGO ONLY) -->
+    <!-- HEADER (LOGO) -->
     <header class="fixed top-0 left-0 p-6 z-50 pointer-events-none">
-        <!-- Logo file must be named logo.png and be in the same folder -->
         <img src="./logo.png" alt="Proyecta Design" class="h-16 md:h-20 object-contain pointer-events-auto">
     </header>
 
@@ -563,11 +568,10 @@
             slides[currentSlide].classList.add('active');
         }, 5000);
 
-        // 4. CURSOR LOGIC (DESKTOP & MOBILE)
+        // 4. CURSOR LOGIC
         const cursor = document.querySelector('.cursor');
         const cursorLabel = document.querySelector('.cursor-label');
 
-        // QuickTo for better performance
         const xTo = gsap.quickTo(cursor, "x", { duration: 0.1, ease: "power3" });
         const yTo = gsap.quickTo(cursor, "y", { duration: 0.1, ease: "power3" });
         const xToLabel = gsap.quickTo(cursorLabel, "x", { duration: 0.15, ease: "power3" });
@@ -578,12 +582,9 @@
         let mouseY = 0;
 
         document.addEventListener('mousemove', (e) => {
-            // Show cursor if hidden
             if(cursor.style.opacity === '0') gsap.to(cursor, { opacity: 1 });
-            
             mouseX = e.clientX;
             mouseY = e.clientY;
-            
             xTo(mouseX);
             yTo(mouseY);
             xToLabel(mouseX + 20);
@@ -593,29 +594,16 @@
         const projects = document.querySelectorAll('.project-item');
 
         projects.forEach(project => {
-            // Hover Desktop
-            project.addEventListener('mouseenter', () => {
-                activateCursor(project);
-            });
-            
-            project.addEventListener('mouseleave', () => {
-                deactivateCursor();
-            });
-
-            // Click: Open Modal
-            project.addEventListener('click', () => {
-                openModal(project);
-            });
+            project.addEventListener('mouseenter', () => activateCursor(project));
+            project.addEventListener('mouseleave', () => deactivateCursor());
+            project.addEventListener('click', () => openModal(project));
         });
 
-        // -- HELPER FUNCTIONS FOR CURSOR STATES --
         function activateCursor(projectElement) {
             const title = projectElement.getAttribute('data-title');
             const color = projectElement.getAttribute('data-color');
-            
             cursorLabel.innerHTML = title;
-            gsap.set(cursorLabel, { x: mouseX + 20, y: mouseY + 20 }); // Force pos
-            
+            gsap.set(cursorLabel, { x: mouseX + 20, y: mouseY + 20 });
             gsap.to(cursor, { scale: 3, backgroundColor: color, mixBlendMode: 'normal' });
             gsap.to(cursorLabel, { opacity: 1 });
         }
@@ -625,61 +613,48 @@
             gsap.to(cursorLabel, { opacity: 0 });
         }
 
+        // -- MOBILE TOUCH EVENTS (FIXED DELAY) --
+        let touchTimeout;
 
-        // -- MOBILE TOUCH EVENTS (SLIDE FINGER) --
-        
-        // 1. Touch Start: Make visible immediately
         document.addEventListener('touchstart', (e) => {
+            clearTimeout(touchTimeout); // Reset cleanup timer if touching again
             const touch = e.touches[0];
             mouseX = touch.clientX;
             mouseY = touch.clientY;
-
-            // Force position immediately so it doesn't fly in from top-left
             xTo(mouseX);
             yTo(mouseY);
             xToLabel(mouseX + 20);
             yToLabel(mouseY + 20);
-
-            // Fade in cursor
             gsap.to(cursor, { opacity: 1, duration: 0.2 });
         }, { passive: true });
 
-        // 2. Touch Move: Follow finger & Check for elements underneath
         document.addEventListener('touchmove', (e) => {
+            clearTimeout(touchTimeout);
             const touch = e.touches[0];
             mouseX = touch.clientX;
             mouseY = touch.clientY;
-
-            // Update position
             xTo(mouseX);
             yTo(mouseY);
             xToLabel(mouseX + 20);
             yToLabel(mouseY + 20);
 
-            // MAGIC: Check what element is under the finger
             const elementBelow = document.elementFromPoint(mouseX, mouseY);
             if (elementBelow) {
-                // Find if we are touching a project item (or its children)
                 const projectItem = elementBelow.closest('.project-item');
-                
-                if (projectItem) {
-                    // Activate utilities (Color, Text)
-                    activateCursor(projectItem);
-                } else {
-                    // Reset to default white dot
-                    deactivateCursor();
-                }
+                if (projectItem) activateCursor(projectItem);
+                else deactivateCursor();
             }
         }, { passive: true });
 
-        // 3. Touch End: Hide cursor
         document.addEventListener('touchend', () => {
-            gsap.to(cursor, { opacity: 0, duration: 0.2 });
-            deactivateCursor();
+            // Keep cursor visible for 2 seconds so user can read text
+            touchTimeout = setTimeout(() => {
+                gsap.to(cursor, { opacity: 0, duration: 0.5 });
+                deactivateCursor();
+            }, 2000); 
         });
 
-
-        // 5. MODAL LOGIC & IMAGES
+        // 5. MODAL
         const modal = document.getElementById('projectModal');
         const mTitle = document.getElementById('mTitle');
         const mCat = document.getElementById('mCat');
@@ -688,7 +663,6 @@
         const mGallery = document.getElementById('mGallery');
         const closeModalBtn = document.getElementById('closeModalBtn');
 
-        // Valid Extra Images for Gallery
         const extraImages = [
             "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=800&auto=format&fit=crop",
             "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800&auto=format&fit=crop",
@@ -696,7 +670,6 @@
         ];
 
         function openModal(el) {
-            // Reset cursor
             gsap.to(cursor, { scale: 1, backgroundColor: 'white', mixBlendMode: 'difference' });
             gsap.to(cursorLabel, { opacity: 0 });
 
@@ -708,14 +681,12 @@
             
             mGallery.innerHTML = '';
             
-            // Main Image
             const mainImgSrc = el.querySelector('img').src;
             const mainImgWrap = document.createElement('div');
             mainImgWrap.className = 'col-span-1 md:col-span-2 aspect-video overflow-hidden relative';
             mainImgWrap.innerHTML = `<img src="${mainImgSrc}" class="w-full h-full object-cover">`;
             mGallery.appendChild(mainImgWrap);
 
-            // Extra Images (Duplicated to fill grid if needed)
             extraImages.forEach(src => {
                 const div = document.createElement('div');
                 div.className = 'aspect-square overflow-hidden bg-gray-900';
@@ -734,14 +705,11 @@
 
         closeModalBtn.addEventListener('click', closeModal);
 
-        // ESC Key Listener (Feature Request)
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && modal.classList.contains('open')) {
-                closeModal();
-            }
+            if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
         });
 
-        // 6. PARALLAX FIX (APPLIED TO CONTAINER)
+        // 6. PARALLAX
         gsap.to(".hero-content", {
             yPercent: 50, ease: "none",
             scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true }
